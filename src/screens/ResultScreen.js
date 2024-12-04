@@ -222,7 +222,14 @@ const styles = StyleSheet.create({
   loadingText: {
     marginTop: 16,
     fontSize: 16,
-    color: "#666",
+    color: '#666',
+  },
+  errorContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 20,
+    backgroundColor: "#f5f5f5",
   },
   errorContainer: {
     flex: 1,
@@ -232,7 +239,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#f5f5f5",
   },
   errorText: {
-    color: "red",
+    color: 'red',
     fontSize: 16,
     textAlign: "center",
     marginTop: 16,
@@ -248,5 +255,16 @@ const styles = StyleSheet.create({
     color: "#fff",
     fontSize: 16,
     fontWeight: "600",
+  },
+  retryButton: {
+    backgroundColor: '#007AFF',
+    paddingVertical: 12,
+    paddingHorizontal: 24,
+    borderRadius: 8,
+  },
+  retryButtonText: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: '600',
   },
 });
