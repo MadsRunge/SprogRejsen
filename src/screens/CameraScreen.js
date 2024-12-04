@@ -1,4 +1,3 @@
-// CameraScreen.js
 import { CameraView, useCameraPermissions } from "expo-camera";
 import { useRef, useState } from "react";
 import {
@@ -9,7 +8,7 @@ import {
   ActivityIndicator,
 } from "react-native";
 import * as Animatable from "react-native-animatable";
-import { recognizeText } from "../api/visionApi";
+import { recognizeText } from "../services/visionApi";
 
 export default function CameraScreen({ navigation }) {
   const [permission, requestPermission] = useCameraPermissions();
@@ -34,7 +33,6 @@ export default function CameraScreen({ navigation }) {
       // Navigate to result screen with the recognized text
       navigation.navigate("Result", {
         recognizedText,
-        // We'll add translatedText later when we implement translation
       });
     } catch (error) {
       console.error("Fejl ved billedtagning:", error);
@@ -70,7 +68,11 @@ export default function CameraScreen({ navigation }) {
 
   return (
     <View style={styles.container}>
-      <CameraView ref={cameraRef} style={styles.camera} facing="back">
+      <CameraView 
+        ref={cameraRef}
+        style={styles.camera} 
+        facing="back"
+      >
         <Animatable.View
           animation="pulse"
           iterationCount="infinite"
@@ -79,10 +81,7 @@ export default function CameraScreen({ navigation }) {
         <View style={styles.overlay}>
           <Text style={styles.guideText}>Placer teksten inden for rammen</Text>
           <TouchableOpacity
-            style={[
-              styles.captureButton,
-              isProcessing && styles.disabledButton,
-            ]}
+            style={[styles.captureButton, isProcessing && styles.disabledButton]}
             onPress={handleCapture}
             disabled={isProcessing}
           >
