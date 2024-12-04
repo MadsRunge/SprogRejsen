@@ -3,26 +3,33 @@ import {
   View,
   Text,
   StyleSheet,
-  TouchableOpacity,
   ActivityIndicator,
+  ScrollView,
 } from "react-native";
 import * as Animatable from "react-native-animatable";
 import { translateText } from "../services/translateApi";
 
-export default function ResultScreen({ route, navigation }) {
+export default function ResultScreen({ route }) {
   const { recognizedText } = route.params || { recognizedText: "" };
   const [translatedText, setTranslatedText] = useState("");
-  const [sourceLanguage, setSourceLanguage] = useState("");
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
+
+  // Clean up recognized text to ensure we only have whole words
+  const cleanText = (text) => {
+    return text
+      .replace(/[^\w\s\-.,!?]/g, "") // Remove special characters except basic punctuation
+      .replace(/\s+/g, " ") // Replace multiple spaces with single space
+      .trim(); // Remove leading/trailing whitespace
+  };
 
   useEffect(() => {
     const performTranslation = async () => {
       try {
         if (recognizedText) {
-          const result = await translateText(recognizedText);
+          const cleanedText = cleanText(recognizedText);
+          const result = await translateText(cleanedText);
           setTranslatedText(result.translatedText);
-          setSourceLanguage(result.sourceLanguage);
         }
       } catch (err) {
         setError("Der opstod en fejl under oversættelsen");
@@ -35,51 +42,48 @@ export default function ResultScreen({ route, navigation }) {
     performTranslation();
   }, [recognizedText]);
 
-  const copyToClipboard = () => {
-    // Implement clipboard functionality
-  };
-
   if (isLoading) {
     return (
-      <View style={styles.container}>
+      <View style={styles.loadingContainer}>
         <ActivityIndicator size="large" color="#007AFF" />
-        <Text style={styles.loadingText}>Oversætter tekst...</Text>
+        <Text style={styles.loadingText}>Oversætter...</Text>
       </View>
     );
   }
 
   if (error) {
     return (
-      <View style={styles.container}>
+      <View style={styles.errorContainer}>
         <Text style={styles.errorText}>{error}</Text>
       </View>
     );
   }
 
   return (
-    <View style={styles.container}>
-      <Animatable.View animation="fadeIn" style={styles.resultContainer}>
-        <View style={styles.textContainer}>
-          <Text style={styles.label}>Original Tekst:</Text>
-          <Text style={styles.resultText}>{recognizedText}</Text>
+    <ScrollView style={styles.container}>
+      <Animatable.View animation="fadeIn" duration={800} style={styles.content}>
+        {/* Original Text Box */}
+        <View style={styles.textBox}>
+          <Text style={styles.label}>Original tekst</Text>
+          <View style={styles.textContainer}>
+            <Text style={styles.text}>{cleanText(recognizedText)}</Text>
+          </View>
         </View>
 
-        <View style={styles.textContainer}>
-          <Text style={styles.label}>Oversat Tekst:</Text>
-          <Text style={styles.resultText}>{translatedText}</Text>
+        {/* Arrow indicator */}
+        <View style={styles.arrowContainer}>
+          <Text style={styles.arrow}>↓</Text>
         </View>
 
-        {sourceLanguage && (
-          <Text style={styles.sourceLanguage}>
-            Oprindeligt sprog: {sourceLanguage}
-          </Text>
-        )}
-
-        <TouchableOpacity style={styles.copyButton} onPress={copyToClipboard}>
-          <Text style={styles.buttonText}>Kopier oversættelse</Text>
-        </TouchableOpacity>
+        {/* Translated Text Box */}
+        <View style={styles.textBox}>
+          <Text style={styles.label}>Dansk oversættelse</Text>
+          <View style={styles.textContainer}>
+            <Text style={styles.text}>{translatedText}</Text>
+          </View>
+        </View>
       </Animatable.View>
-    </View>
+    </ScrollView>
   );
 }
 
@@ -87,55 +91,68 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "#fff",
-    padding: 20,
   },
-  resultContainer: {
+  content: {
+    padding: 20,
+    paddingTop: 10,
+  },
+  loadingContainer: {
     flex: 1,
     justifyContent: "center",
-  },
-  textContainer: {
-    marginBottom: 20,
-  },
-  label: {
-    fontSize: 16,
-    fontWeight: "bold",
-    marginBottom: 8,
-    color: "#666",
-  },
-  resultText: {
-    fontSize: 18,
-    marginBottom: 20,
-    textAlign: "left",
-    backgroundColor: "#f8f9fa",
-    padding: 15,
-    borderRadius: 8,
-  },
-  sourceLanguage: {
-    fontSize: 14,
-    color: "#666",
-    marginBottom: 20,
-    textAlign: "center",
-  },
-  copyButton: {
-    backgroundColor: "#007AFF",
-    padding: 15,
-    borderRadius: 10,
-    width: "100%",
     alignItems: "center",
-  },
-  buttonText: {
-    color: "#fff",
-    fontSize: 16,
-    fontWeight: "600",
+    backgroundColor: "#fff",
   },
   loadingText: {
-    marginTop: 20,
+    marginTop: 12,
     fontSize: 16,
     color: "#666",
   },
+  errorContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    padding: 20,
+  },
   errorText: {
-    color: "red",
+    color: "#ff3b30",
     fontSize: 16,
     textAlign: "center",
+  },
+  textBox: {
+    marginVertical: 10,
+  },
+  label: {
+    fontSize: 14,
+    fontWeight: "600",
+    color: "#666",
+    marginBottom: 8,
+    marginLeft: 4,
+  },
+  textContainer: {
+    backgroundColor: "#f8f9fa",
+    borderRadius: 12,
+    padding: 16,
+    minHeight: 100,
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.1,
+    shadowRadius: 3,
+    elevation: 3,
+  },
+  text: {
+    fontSize: 18,
+    lineHeight: 24,
+    color: "#000",
+  },
+  arrowContainer: {
+    alignItems: "center",
+    marginVertical: 5,
+  },
+  arrow: {
+    fontSize: 24,
+    color: "#666",
   },
 });
