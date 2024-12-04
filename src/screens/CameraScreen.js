@@ -1,25 +1,49 @@
 // CameraScreen.js
 import { CameraView, useCameraPermissions } from "expo-camera";
-import { useState } from "react";
-import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { useRef, useState } from "react";
+import {
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+  ActivityIndicator,
+} from "react-native";
 import * as Animatable from "react-native-animatable";
+import { recognizeText } from "../api/visionApi";
 
 export default function CameraScreen({ navigation }) {
   const [permission, requestPermission] = useCameraPermissions();
+  const [isProcessing, setIsProcessing] = useState(false);
+  const cameraRef = useRef(null);
 
   const handleCapture = async () => {
+    if (isProcessing) return;
+
     try {
-      const photo = await cameraView.current.takePictureAsync({
+      setIsProcessing(true);
+
+      // Take the picture
+      const photo = await cameraRef.current.takePictureAsync({
         quality: 1,
         base64: true,
       });
 
-      // Her vil vi senere implementere Google Vision API
+      // Recognize text from the image
+      const recognizedText = await recognizeText(photo.uri);
+
+      // Navigate to result screen with the recognized text
       navigation.navigate("Result", {
-        translatedText: "Test oversættelse",
+        recognizedText,
+        // We'll add translatedText later when we implement translation
       });
     } catch (error) {
       console.error("Fejl ved billedtagning:", error);
+      Alert.alert(
+        "Fejl",
+        "Der opstod en fejl under scanning af teksten. Prøv venligst igen."
+      );
+    } finally {
+      setIsProcessing(false);
     }
   };
 
@@ -46,7 +70,7 @@ export default function CameraScreen({ navigation }) {
 
   return (
     <View style={styles.container}>
-      <CameraView style={styles.camera} facing="back">
+      <CameraView ref={cameraRef} style={styles.camera} facing="back">
         <Animatable.View
           animation="pulse"
           iterationCount="infinite"
@@ -55,10 +79,18 @@ export default function CameraScreen({ navigation }) {
         <View style={styles.overlay}>
           <Text style={styles.guideText}>Placer teksten inden for rammen</Text>
           <TouchableOpacity
-            style={styles.captureButton}
+            style={[
+              styles.captureButton,
+              isProcessing && styles.disabledButton,
+            ]}
             onPress={handleCapture}
+            disabled={isProcessing}
           >
-            <Text style={styles.buttonText}>Tag Billede</Text>
+            {isProcessing ? (
+              <ActivityIndicator color="#000" />
+            ) : (
+              <Text style={styles.buttonText}>Tag Billede</Text>
+            )}
           </TouchableOpacity>
         </View>
       </CameraView>
@@ -122,5 +154,8 @@ const styles = StyleSheet.create({
     padding: 15,
     borderRadius: 10,
     marginHorizontal: 20,
+  },
+  disabledButton: {
+    opacity: 0.7,
   },
 });
