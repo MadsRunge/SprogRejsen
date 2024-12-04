@@ -10,24 +10,12 @@ import {
   PanResponder,
   Dimensions,
   Animated,
-  Alert,
-  PanResponder,
-  Dimensions,
-  Animated,
 } from "react-native";
 import { Frame } from '../components/Frame';
 import { CameraControls } from '../components/CameraControls';
-import { cropImage } from '../utils/ImageUtils';
+import { cropImage } from '../utils/imageUtils';
 import * as FileSystem from "expo-file-system";
 import { recognizeText } from "../services/visionApi";
-import * as FileSystem from "expo-file-system";
-import * as ImageManipulator from 'expo-image-manipulator';
-
-const PRESET_SIZES = [
-  { name: 'S', width: SCREEN_WIDTH * 0.3, height: 100 },
-  { name: 'M', width: SCREEN_WIDTH * 0.6, height: 200 },
-  { name: 'L', width: SCREEN_WIDTH * 0.8, height: 300 },
-];
 
 const SCREEN_WIDTH = Dimensions.get('window').width;
 const SCREEN_HEIGHT = Dimensions.get('window').height;
