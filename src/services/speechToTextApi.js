@@ -1,38 +1,72 @@
+// speechToTextApi.js
 import { GOOGLE_CLOUD_API_KEY } from "@env";
 
 const SPEECH_API_ENDPOINT = "https://speech.googleapis.com/v1/speech:recognize";
+const STREAMING_ENDPOINT = "https://speech.googleapis.com/v1/speech:streamingRecognize";
+
+// Konfigurationer for forskellige sprog
+const LANGUAGE_CONFIGS = {
+  'da-DK': { model: 'default' },
+  'en-US': { model: 'default' },
+  'de-DE': { model: 'default' },
+  // Tilføj flere sprog efter behov
+};
+
+// Validér og forbered audio data
+const prepareAudioData = async (audioBase64) => {
+  if (!audioBase64) {
+    throw new Error("Ingen lyddata modtaget");
+  }
+
+  // Check fil størrelse (max 10MB)
+  const sizeInBytes = (audioBase64.length * 3) / 4;
+  if (sizeInBytes > 10 * 1024 * 1024) {
+    throw new Error("Lydfilen er for stor (max 10MB)");
+  }
+
+  return audioBase64;
+};
 
 export const transcribeAudio = async (audioBase64, config = {}) => {
   try {
-    if (!audioBase64) {
-      throw new Error("No audio data provided");
-    }
-
     if (!GOOGLE_CLOUD_API_KEY) {
-      throw new Error("Google Cloud API Key is not configured");
+      throw new Error("Google Cloud API nøgle mangler");
     }
 
+    // Validér og forbered audio
+    const preparedAudio = await prepareAudioData(audioBase64);
+
+    // Hent sprog-specifik config
+    const languageCode = config.languageCode || 'da-DK';
+    const langConfig = LANGUAGE_CONFIGS[languageCode] || LANGUAGE_CONFIGS['da-DK'];
+
+    // Byg request body med forbedrede indstillinger
     const requestBody = {
       config: {
         encoding: "LINEAR16",
         sampleRateHertz: 48000,
-        languageCode: "da-DK",
-        model: "default",
+        languageCode,
+        model: langConfig.model,
         audioChannelCount: 1,
         enableAutomaticPunctuation: true,
         useEnhanced: true,
+        enableWordTimeOffsets: true,
+        enableWordConfidence: true,
+        profanityFilter: false,
+        speechContexts: [
+          {
+            phrases: [], // Tilføj domæne-specifikke fraser her
+            boost: 20,
+          },
+        ],
         ...config,
       },
       audio: {
-        content: audioBase64,
+        content: preparedAudio,
       },
     };
 
-    console.log(
-      "Making request to Speech-to-Text API with config:",
-      JSON.stringify(requestBody.config)
-    );
-
+    // Send request til API
     const response = await fetch(
       `${SPEECH_API_ENDPOINT}?key=${GOOGLE_CLOUD_API_KEY}`,
       {
@@ -44,38 +78,86 @@ export const transcribeAudio = async (audioBase64, config = {}) => {
       }
     );
 
-    console.log("Speech-to-Text API Response status:", response.status);
-
     if (!response.ok) {
       const errorText = await response.text();
-      console.error("Speech-to-Text API Error:", errorText);
-      throw new Error(`HTTP error! status: ${response.status}`);
+      console.error("Speech-to-Text API Fejl:", errorText);
+      
+      // Håndter specifikke API fejl
+      if (response.status === 400) {
+        throw new Error("Ugyldigt lydformat eller konfiguration");
+      } else if (response.status === 403) {
+        throw new Error("API nøgle er ugyldig eller mangler rettigheder");
+      } else {
+        throw new Error(`API fejl: ${response.status}`);
+      }
     }
 
     const data = await response.json();
-    console.log("Speech-to-Text API Response:", JSON.stringify(data, null, 2));
 
+    // Validér response data
     if (!data.results || data.results.length === 0) {
-      console.error(
-        "No transcription results in response:",
-        JSON.stringify(data)
-      );
       throw new Error(
-        "Ingen tale blev genkendt. Prøv at tale tydeligere eller tjek din mikrofon."
+        "Ingen tale genkendt. Prøv at tale tydeligere eller tjek mikrofonen."
       );
     }
 
-    // Return the transcribed text from all results
-    const transcription = data.results
-      .map((result) => result.alternatives[0].transcript)
-      .join(" ");
+    // Behandl resultaterne
+    const results = data.results.map(result => ({
+      transcript: result.alternatives[0].transcript,
+      confidence: result.alternatives[0].confidence,
+      words: result.alternatives[0].words || [],
+    }));
 
+    // Samlet transskription og metadata
     return {
-      transcription,
-      confidence: data.results[0].alternatives[0].confidence,
+      transcription: results.map(r => r.transcript).join(" "),
+      confidence: results[0].confidence,
+      words: results.flatMap(r => r.words),
+      languageCode,
     };
+
   } catch (error) {
-    console.error("Error in transcribeAudio:", error);
-    throw error;
+    console.error("Transskriptionsfejl:", error);
+    throw new Error(
+      error.message || "Kunne ikke genkende tale"
+    );
   }
 };
+
+// Streaming transskription (real-time)
+export class StreamingRecognition {
+  constructor(config = {}) {
+    this.config = {
+      encoding: "LINEAR16",
+      sampleRateHertz: 48000,
+      languageCode: config.languageCode || 'da-DK',
+      enableAutomaticPunctuation: true,
+      interimResults: true,
+      ...config,
+    };
+    this.listeners = new Set();
+  }
+
+  addListener(callback) {
+    this.listeners.add(callback);
+  }
+
+  removeListener(callback) {
+    this.listeners.delete(callback);
+  }
+
+  notify(result) {
+    this.listeners.forEach(callback => callback(result));
+  }
+
+  // Start streaming recognition
+  async start() {
+    // Implementation af WebSocket baseret streaming vil blive tilføjet her
+    // Dette kræver yderligere setup på server-siden
+  }
+
+  // Stop streaming recognition
+  async stop() {
+    // Cleanup kode for streaming
+  }
+}
