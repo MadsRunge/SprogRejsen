@@ -7,10 +7,12 @@ import {
   ActivityIndicator,
   ScrollView,
   Clipboard,
+  Alert,
 } from "react-native";
 import * as Animatable from "react-native-animatable";
 import { MaterialIcons } from "@expo/vector-icons";
 import { translateText } from "../services/translateApi";
+import { saveTranslation } from "../services/firebaseConfig";
 
 export default function ResultScreen({ route, navigation }) {
   const { recognizedText } = route.params || { recognizedText: "" };
@@ -19,36 +21,50 @@ export default function ResultScreen({ route, navigation }) {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
   const [copiedText, setCopiedText] = useState(null);
+  const [isSaving, setIsSaving] = useState(false);
 
   useEffect(() => {
     const performTranslation = async () => {
       try {
         if (recognizedText) {
+          // Oversæt teksten
           const result = await translateText(recognizedText);
           setTranslatedText(result.translatedText);
           setSourceLanguage(result.sourceLanguage);
+
+          // Gem oversættelsen i Firebase
+          setIsSaving(true);
+          await saveTranslation({
+            originalText: recognizedText,
+            translatedText: result.translatedText,
+            sourceLanguage: result.sourceLanguage,
+          });
         }
       } catch (err) {
-        setError("Der opstod en fejl under oversættelsen");
-        console.error(err);
+        console.error("Error:", err);
+        setError(err.message || "Der opstod en fejl under oversættelsen");
       } finally {
         setIsLoading(false);
+        setIsSaving(false);
       }
     };
+
     performTranslation();
   }, [recognizedText]);
 
   const copyToClipboard = async (text, type) => {
     await Clipboard.setString(text);
     setCopiedText(type);
-    setTimeout(() => setCopiedText(null), 2000); // Reset efter 2 sekunder
+    setTimeout(() => setCopiedText(null), 2000);
   };
 
-  if (isLoading) {
+  if (isLoading || isSaving) {
     return (
       <View style={styles.loadingContainer}>
         <ActivityIndicator size="large" color="#007AFF" />
-        <Text style={styles.loadingText}>Oversætter tekst...</Text>
+        <Text style={styles.loadingText}>
+          {isLoading ? "Oversætter tekst..." : "Gemmer oversættelse..."}
+        </Text>
       </View>
     );
   }
@@ -125,6 +141,14 @@ export default function ResultScreen({ route, navigation }) {
           >
             <MaterialIcons name="camera-alt" size={24} color="white" />
             <Text style={styles.actionButtonText}>Ny Scanning</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={[styles.actionButton, styles.historyButton]}
+            onPress={() => navigation.navigate("History")}
+          >
+            <MaterialIcons name="history" size={24} color="white" />
+            <Text style={styles.actionButtonText}>Se Historik</Text>
           </TouchableOpacity>
         </View>
       </Animatable.View>
@@ -222,12 +246,12 @@ const styles = StyleSheet.create({
   loadingText: {
     marginTop: 16,
     fontSize: 16,
-    color: '#666',
+    color: "#666",
   },
   errorContainer: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
     padding: 20,
     backgroundColor: "#f5f5f5",
   },
@@ -239,7 +263,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#f5f5f5",
   },
   errorText: {
-    color: 'red',
+    color: "red",
     fontSize: 16,
     textAlign: "center",
     marginTop: 16,
@@ -257,14 +281,22 @@ const styles = StyleSheet.create({
     fontWeight: "600",
   },
   retryButton: {
-    backgroundColor: '#007AFF',
+    backgroundColor: "#007AFF",
     paddingVertical: 12,
     paddingHorizontal: 24,
     borderRadius: 8,
   },
   retryButtonText: {
-    color: '#fff',
+    color: "#fff",
     fontSize: 16,
-    fontWeight: '600',
+    fontWeight: "600",
+  },
+  actionButtons: {
+    marginTop: 8,
+    gap: 12,
+  },
+
+  historyButton: {
+    backgroundColor: "#4CAF50",
   },
 });
