@@ -7,6 +7,7 @@ import HomeScreen from "./src/screens/HomeScreen";
 import CameraScreen from "./src/screens/CameraScreen";
 import ResultScreen from "./src/screens/ResultScreen";
 import HistoryScreen from "./src/screens/HistoryScreen";
+import TextTranslateScreen from "./src/screens/TextTranslateScreen";
 
 const Stack = createNativeStackNavigator();
 
@@ -44,6 +45,11 @@ export default function App() {
           name="History"
           component={HistoryScreen}
           options={{ title: "Oversættelseshistorik" }}
+        />
+        <Stack.Screen
+          name="TextTranslate"
+          component={TextTranslateScreen}
+          options={{ title: "Oversæt Tekst" }}
         />
       </Stack.Navigator>
     </NavigationContainer>

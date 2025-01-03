@@ -3,6 +3,7 @@ import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
 import * as Animatable from "react-native-animatable";
 import { MaterialIcons } from "@expo/vector-icons";
 
+
 export default function HomeScreen({ navigation }) {
   return (
     <View style={styles.container}>
@@ -10,21 +11,32 @@ export default function HomeScreen({ navigation }) {
         Scan & Translate
       </Animatable.Text>
 
-      <TouchableOpacity
-        style={styles.scanButton}
-        onPress={() => navigation.navigate("Camera")}
-      >
+      
+      <Animatable.View animation="fadeIn" delay={200} style={styles.buttonContainer}>
+        <TouchableOpacity
+          style={[styles.button, styles.scanButton]}
+          onPress={() => navigation.navigate("Camera")}
+        >
         <MaterialIcons name="camera-alt" size={24} color="white" />
-        <Text style={styles.buttonText}>Scan Tekst</Text>
-      </TouchableOpacity>
+          <MaterialIcons name="camera-alt" size={24} color="#fff" />
+          <Text style={styles.buttonText}>Scan Tekst</Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={[styles.button, styles.translateButton]}
+          onPress={() => navigation.navigate("TextTranslate")}
+        >
+          <MaterialIcons name="translate" size={24} color="#fff" />
+          <Text style={styles.buttonText}>Oversæt Tekst</Text>
+        </TouchableOpacity>
 
-      <TouchableOpacity
+        <TouchableOpacity
         style={styles.historyButton}
         onPress={() => navigation.navigate("History")}
       >
         <MaterialIcons name="history" size={24} color="#007AFF" />
         <Text style={styles.historyButtonText}>Se Historik</Text>
       </TouchableOpacity>
+      </Animatable.View>
     </View>
   );
 }
@@ -36,18 +48,36 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     padding: 20,
+    padding: 20,
   },
   title: {
-    fontSize: 24,
+    fontSize: 28,
     fontWeight: "bold",
-    marginBottom: 30,
+    marginBottom: 40,
+    color: "#333",
+  },
+  buttonContainer: {
+    width: "100%",
+    maxWidth: 300,
+  },
+  button: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    padding: 16,
+    borderRadius: 12,
+    marginBottom: 16,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
   },
   scanButton: {
     backgroundColor: "#007AFF",
-    padding: 15,
-    borderRadius: 10,
-    width: "80%",
-    alignItems: "center",
+  },
+  translateButton: {
+    backgroundColor: "#34C759",
     flexDirection: "row",
     justifyContent: "center",
     marginBottom: 16,
@@ -73,6 +103,7 @@ const styles = StyleSheet.create({
     color: "#007AFF",
     fontSize: 18,
     fontWeight: "600",
+    marginLeft: 8,
     marginLeft: 8,
   },
 });
