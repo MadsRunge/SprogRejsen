@@ -1,30 +1,37 @@
 import React from "react";
-import { View, Text, StyleSheet, TouchableOpacity, SafeAreaView, Dimensions } from "react-native";
+import {
+  View,
+  Text,
+  StyleSheet,
+  TouchableOpacity,
+  SafeAreaView,
+  Dimensions,
+} from "react-native";
 import * as Animatable from "react-native-animatable";
 import { MaterialIcons } from "@expo/vector-icons";
-import { LinearGradient } from 'expo-linear-gradient';
+import { LinearGradient } from "expo-linear-gradient";
 
-const { width } = Dimensions.get('window');
+const { width } = Dimensions.get("window");
 
 export default function HomeScreen({ navigation }) {
   return (
     <SafeAreaView style={styles.container}>
-      <Animatable.View 
-        animation="fadeIn" 
-        duration={800} 
+      <Animatable.View
+        animation="fadeIn"
+        duration={800}
         style={styles.contentContainer}
       >
         {/* Header Section with Gradient Background */}
         <View style={styles.headerSection}>
           <LinearGradient
-            colors={['#007AFF', '#34C759']}
+            colors={["#007AFF", "#34C759"]}
             start={{ x: 0, y: 0 }}
             end={{ x: 1, y: 1 }}
             style={styles.headerGradient}
           >
-            <Animatable.View 
-              animation="fadeIn" 
-              delay={200} 
+            <Animatable.View
+              animation="fadeIn"
+              delay={200}
               style={styles.headerContent}
             >
               <View style={styles.logoContainer}>
@@ -51,9 +58,15 @@ export default function HomeScreen({ navigation }) {
                 </View>
                 <View style={styles.buttonContent}>
                   <Text style={styles.buttonTitle}>Scan Tekst</Text>
-                  <Text style={styles.buttonSubtext}>Tag et billede af tekst</Text>
+                  <Text style={styles.buttonSubtext}>
+                    Tag et billede af tekst
+                  </Text>
                 </View>
-                <MaterialIcons name="arrow-forward-ios" size={20} color="#007AFF" />
+                <MaterialIcons
+                  name="arrow-forward-ios"
+                  size={20}
+                  color="#007AFF"
+                />
               </TouchableOpacity>
             </Animatable.View>
 
@@ -66,26 +79,64 @@ export default function HomeScreen({ navigation }) {
                   <MaterialIcons name="translate" size={28} color="#34C759" />
                 </View>
                 <View style={styles.buttonContent}>
-                  <Text style={[styles.buttonTitle, { color: '#34C759' }]}>Oversæt Tekst</Text>
-                  <Text style={styles.buttonSubtext}>Indtast eller indsæt tekst</Text>
+                  <Text style={[styles.buttonTitle, { color: "#34C759" }]}>
+                    Oversæt Tekst
+                  </Text>
+                  <Text style={styles.buttonSubtext}>
+                    Indtast eller indsæt tekst
+                  </Text>
                 </View>
-                <MaterialIcons name="arrow-forward-ios" size={20} color="#34C759" />
+                <MaterialIcons
+                  name="arrow-forward-ios"
+                  size={20}
+                  color="#34C759"
+                />
               </TouchableOpacity>
             </Animatable.View>
 
             <Animatable.View animation="fadeInUp" delay={800}>
               <TouchableOpacity
+                style={[styles.mainButton, styles.speechButton]}
+                onPress={() => navigation.navigate("Speech")}
+              >
+                <View style={styles.iconContainer}>
+                  <MaterialIcons
+                    name="record-voice-over"
+                    size={28}
+                    color="#FF3B30"
+                  />
+                </View>
+                <View style={styles.buttonContent}>
+                  <Text style={[styles.buttonTitle, { color: "#FF3B30" }]}>
+                    Oversæt Tale
+                  </Text>
+                  <Text style={styles.buttonSubtext}>
+                    Optag og oversæt tale
+                  </Text>
+                </View>
+                <MaterialIcons
+                  name="arrow-forward-ios"
+                  size={20}
+                  color="#FF3B30"
+                />
+              </TouchableOpacity>
+            </Animatable.View>
+
+            <Animatable.View animation="fadeInUp" delay={1000}>
+              <TouchableOpacity
                 style={styles.historyButton}
                 onPress={() => navigation.navigate("History")}
               >
                 <LinearGradient
-                  colors={['#007AFF', '#34C759']}
+                  colors={["#007AFF", "#34C759"]}
                   start={{ x: 0, y: 0 }}
                   end={{ x: 1, y: 0 }}
                   style={styles.historyGradient}
                 >
                   <MaterialIcons name="history" size={24} color="#fff" />
-                  <Text style={styles.historyButtonText}>Se Oversættelseshistorik</Text>
+                  <Text style={styles.historyButtonText}>
+                    Se Oversættelseshistorik
+                  </Text>
                 </LinearGradient>
               </TouchableOpacity>
             </Animatable.View>
@@ -108,10 +159,10 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   headerSection: {
-    height: '40%',
+    height: "35%",
   },
   headerGradient: {
-    height: '100%',
+    height: "100%",
     paddingTop: 60,
     paddingBottom: 40,
     borderBottomLeftRadius: 30,
@@ -123,7 +174,7 @@ const styles = StyleSheet.create({
     elevation: 10,
   },
   headerContent: {
-    alignItems: 'center',
+    alignItems: "center",
     paddingHorizontal: 24,
     marginTop: 20,
   },
@@ -131,9 +182,9 @@ const styles = StyleSheet.create({
     width: 72,
     height: 72,
     borderRadius: 36,
-    backgroundColor: 'rgba(255, 255, 255, 0.2)',
-    justifyContent: 'center',
-    alignItems: 'center',
+    backgroundColor: "rgba(255, 255, 255, 0.2)",
+    justifyContent: "center",
+    alignItems: "center",
     marginBottom: 16,
   },
   title: {
@@ -141,18 +192,18 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     color: "#ffffff",
     marginBottom: 8,
-    textAlign: 'center',
+    textAlign: "center",
   },
   subtitle: {
     fontSize: 16,
     color: "rgba(255, 255, 255, 0.9)",
-    textAlign: 'center',
+    textAlign: "center",
   },
   actionsContainer: {
     flex: 1,
-    backgroundColor: '#fff',
+    backgroundColor: "#fff",
     paddingHorizontal: 24,
-    paddingTop: 40,
+    paddingTop: 32,
   },
   mainActions: {
     gap: 16,
@@ -162,46 +213,48 @@ const styles = StyleSheet.create({
     alignItems: "center",
     padding: 20,
     borderRadius: 16,
-    backgroundColor: '#fff',
+    backgroundColor: "#fff",
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.1,
     shadowRadius: 8,
     elevation: 5,
     borderWidth: 1,
-    borderColor: '#f0f0f0',
   },
   iconContainer: {
     width: 50,
     height: 50,
     borderRadius: 25,
-    backgroundColor: '#f8f9fa',
-    justifyContent: 'center',
-    alignItems: 'center',
+    backgroundColor: "#f8f9fa",
+    justifyContent: "center",
+    alignItems: "center",
   },
   buttonContent: {
     flex: 1,
     marginLeft: 16,
   },
   buttonTitle: {
-    color: '#007AFF',
     fontSize: 18,
     fontWeight: "600",
   },
   buttonSubtext: {
-    color: '#666',
+    color: "#666",
     fontSize: 14,
     marginTop: 4,
   },
   scanButton: {
-    borderColor: '#007AFF20',
+    borderColor: "#007AFF20",
   },
   translateButton: {
-    borderColor: '#34C75920',
+    borderColor: "#34C75920",
+  },
+  speechButton: {
+    borderColor: "#FF3B3020",
   },
   historyButton: {
     borderRadius: 12,
-    overflow: 'hidden',
+    overflow: "hidden",
+    marginTop: 8,
   },
   historyGradient: {
     flexDirection: "row",
@@ -216,9 +269,10 @@ const styles = StyleSheet.create({
     marginLeft: 8,
   },
   versionText: {
-    textAlign: 'center',
-    color: '#999',
+    textAlign: "center",
+    color: "#999",
     fontSize: 12,
     marginBottom: 16,
+    marginTop: 8,
   },
 });
