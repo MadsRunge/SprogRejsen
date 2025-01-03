@@ -17,7 +17,8 @@
     "ios": {
       "supportsTablet": true,
       "infoPlist": {
-        "NSCameraUsageDescription": "Vi har brug for adgang til dit kamera for at kunne scanne tekst"
+        "NSCameraUsageDescription": "Vi har brug for adgang til dit kamera for at kunne scanne tekst",
+        "NSMicrophoneUsageDescription": "Vi har brug for adgang til din mikrofon for at kunne optage lyd"
       }
     },
     "android": {
@@ -25,13 +26,19 @@
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
       },
-      "permissions": ["CAMERA"]
+      "permissions": ["CAMERA", "RECORD_AUDIO"]
     },
     "plugins": [
       [
         "expo-camera",
         {
           "cameraPermission": "Vi har brug for adgang til dit kamera for at kunne scanne tekst."
+        }
+      ],
+      [
+        "expo-av",
+        {
+          "microphonePermission": "Vi har brug for adgang til din mikrofon for at kunne optage lyd."
         }
       ]
     ]
