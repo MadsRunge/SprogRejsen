@@ -1,93 +1,129 @@
-import React from "react";
+import React from 'react';
 import {
   View,
   Text,
   StyleSheet,
   TouchableOpacity,
   SafeAreaView,
-} from "react-native";
-import { MaterialIcons } from "@expo/vector-icons";
-import { LinearGradient } from "expo-linear-gradient";
+  Platform,
+  StatusBar,
+  Dimensions
+} from 'react-native';
+import { MaterialIcons } from '@expo/vector-icons';
+import { LinearGradient } from 'expo-linear-gradient';
+import * as Animatable from 'react-native-animatable';
 
 export default function HomeScreen({ navigation }) {
+  const renderFeatureButton = (feature) => {
+    return (
+      <TouchableOpacity
+        key={feature.id}
+        style={[
+          styles.featureButton,
+          { borderColor: feature.color + '40' } // Tilføjer 25% opacity version af farven
+        ]}
+        onPress={() => navigation.navigate(feature.route)}
+        activeOpacity={0.7}
+      >
+        <View style={[styles.iconContainer, { backgroundColor: feature.color }]}>
+          <MaterialIcons name={feature.icon} size={32} color="#fff" />
+        </View>
+        <Text style={styles.featureTitle}>{feature.title}</Text>
+      </TouchableOpacity>
+    );
+  };
+
   const features = [
     {
-      title: "Scan Tekst",
-      icon: "camera-alt",
-      color: "#007AFF",
-      onPress: () => navigation.navigate("Camera"),
+      id: 'camera',
+      title: 'Scan Tekst',
+      icon: 'camera-alt',
+      color: '#3B82F6',  // Bright blue
+      route: 'Camera'
     },
     {
-      title: "Oversæt Tekst",
-      icon: "translate",
-      color: "#34C759",
-      onPress: () => navigation.navigate("TextTranslate"),
+      id: 'text',
+      title: 'Oversæt Tekst',
+      icon: 'translate',
+      color: '#10B981',  // Emerald green
+      route: 'TextTranslate'
     },
     {
-      title: "Oversæt Tale",
-      icon: "record-voice-over",
-      color: "#FF3B30",
-      onPress: () => navigation.navigate("Speech"),
+      id: 'speech',
+      title: 'Tale Oversættelse',
+      icon: 'record-voice-over',
+      color: '#F97316',  // Orange
+      route: 'Speech'
     },
     {
-      title: "Historik",
-      icon: "history",
-      color: "#5856D6",
-      onPress: () => navigation.navigate("History"),
-    },
+      id: 'history',
+      title: 'Historik',
+      icon: 'history',
+      color: '#8B5CF6',  // Purple
+      route: 'History'
+    }
   ];
 
   return (
     <SafeAreaView style={styles.container}>
-      {/* Header Section */}
+      <StatusBar barStyle="dark-content" />
+      
+      {/* Header */}
       <LinearGradient
-        colors={["#007AFF", "#34C759"]}
+        colors={['#4F46E5', '#3730A3']}
         start={{ x: 0, y: 0 }}
         end={{ x: 1, y: 1 }}
         style={styles.header}
       >
-        <View style={styles.headerContent}>
-          <View style={styles.logoContainer}>
+        {/* Decorative circles */}
+        <Animatable.View animation="fadeIn" duration={1500} style={[styles.decorativeCircle, styles.circle1]} />
+        <Animatable.View animation="fadeIn" duration={1500} style={[styles.decorativeCircle, styles.circle2]} />
+        <Animatable.View animation="fadeIn" duration={1500} style={[styles.decorativeCircle, styles.circle3]} />
+        
+        <Animatable.View 
+          animation="fadeInUp" 
+          duration={1000} 
+          style={styles.headerContent}
+        >
+          <View style={styles.iconWrapper}>
             <MaterialIcons name="g-translate" size={32} color="#fff" />
           </View>
-          <Text style={styles.title}>Scan & Translate</Text>
-          <Text style={styles.subtitle}>
-            Din intelligente oversættelsesassistent
-          </Text>
+          
+          <View style={styles.titleContainer}>
+            <Animatable.Text 
+              animation="fadeInRight" 
+              delay={300} 
+              style={styles.title}
+            >
+              Scan & Translate
+            </Animatable.Text>
+            <Animatable.View 
+              animation="fadeInRight" 
+              delay={500} 
+              style={styles.subtitleWrapper}
+            >
+              <MaterialIcons name="auto-awesome" size={16} color="#FFD700" style={styles.star} />
+              <Text style={styles.subtitle}>Oversæt alt med ét klik</Text>
+            </Animatable.View>
+          </View>
+        </Animatable.View>
+
+        {/* Wave decoration at bottom */}
+        <View style={styles.wave}>
+          <Animatable.View 
+            animation="fadeInUp" 
+            delay={200} 
+            style={styles.waveEffect} 
+          />
         </View>
       </LinearGradient>
 
-      {/* Grid Layout */}
-      <View style={styles.gridContainer}>
+      {/* Features Grid */}
+      <View style={styles.content}>
         <View style={styles.grid}>
-          {features.map((feature, index) => (
-            <View key={index} style={styles.gridItem}>
-              <TouchableOpacity
-                style={[styles.card, { borderColor: `${feature.color}20` }]}
-                onPress={feature.onPress}
-                activeOpacity={0.7}
-              >
-                <View
-                  style={[
-                    styles.iconContainer,
-                    { backgroundColor: `${feature.color}10` },
-                  ]}
-                >
-                  <MaterialIcons
-                    name={feature.icon}
-                    size={28}
-                    color={feature.color}
-                  />
-                </View>
-                <Text style={styles.cardTitle}>{feature.title}</Text>
-              </TouchableOpacity>
-            </View>
-          ))}
+          {features.map(renderFeatureButton)}
         </View>
       </View>
-
-      {/* Version Info */}
-      <Text style={styles.version}>Version 1.0.0</Text>
     </SafeAreaView>
   );
 }
@@ -95,89 +131,146 @@ export default function HomeScreen({ navigation }) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#fff",
+    backgroundColor: '#fff',
   },
   header: {
-    paddingTop: 60,
-    paddingBottom: 30,
+    height: 220,
+    position: 'relative',
+    overflow: 'hidden',
     borderBottomLeftRadius: 30,
     borderBottomRightRadius: 30,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.15,
-    shadowRadius: 12,
-    elevation: 8,
+    elevation: 5,
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 4,
+    },
+    shadowOpacity: 0.2,
+    shadowRadius: 8,
   },
   headerContent: {
-    alignItems: "center",
-    paddingHorizontal: 24,
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 20,
+    paddingTop: Platform.OS === 'android' ? StatusBar.currentHeight + 20 : 20,
+    zIndex: 2,
   },
-  logoContainer: {
-    width: 64,
-    height: 64,
-    borderRadius: 32,
-    backgroundColor: "rgba(255, 255, 255, 0.2)",
-    justifyContent: "center",
-    alignItems: "center",
-    marginBottom: 16,
+  iconWrapper: {
+    width: 60,
+    height: 60,
+    backgroundColor: 'rgba(255,255,255,0.2)',
+    borderRadius: 20,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: 15,
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.3)',
+  },
+  titleContainer: {
+    flex: 1,
   },
   title: {
     fontSize: 32,
-    fontWeight: "bold",
-    color: "#fff",
+    fontWeight: 'bold',
+    color: '#fff',
     marginBottom: 8,
+  },
+  subtitleWrapper: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  star: {
+    marginRight: 6,
   },
   subtitle: {
     fontSize: 16,
-    color: "rgba(255, 255, 255, 0.9)",
-    textAlign: "center",
+    color: 'rgba(255,255,255,0.9)',
   },
-  gridContainer: {
+  decorativeCircle: {
+    position: 'absolute',
+    backgroundColor: 'rgba(255,255,255,0.1)',
+    borderRadius: 100,
+  },
+  circle1: {
+    width: 150,
+    height: 150,
+    top: -30,
+    right: -30,
+  },
+  circle2: {
+    width: 100,
+    height: 100,
+    top: 40,
+    right: 40,
+  },
+  circle3: {
+    width: 60,
+    height: 60,
+    top: 90,
+    right: 100,
+  },
+  wave: {
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
+    height: 50,
+    backgroundColor: 'transparent',
+    zIndex: 1,
+  },
+  waveEffect: {
+    position: 'absolute',
+    bottom: -10,
+    left: -5,
+    right: -5,
+    height: 50,
+    backgroundColor: '#fff',
+    borderTopLeftRadius: 30,
+    borderTopRightRadius: 30,
+  },
+  content: {
     flex: 1,
-    padding: 16,
+    padding: 20,
   },
   grid: {
-    flex: 1,
-    flexDirection: "row",
-    flexWrap: "wrap",
-    justifyContent: "space-between",
-    alignContent: "flex-start",
-    gap: 16,
-    paddingTop: 16,
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'center',
+    gap: 20,
+    paddingTop: 40,
   },
-  gridItem: {
-    width: "47%", // Slightly less than 50% to account for gap
-  },
-  card: {
-    backgroundColor: "#fff",
-    borderRadius: 20,
-    padding: 16,
-    alignItems: "center",
+  featureButton: {
+    width: 160,  // Fast bredde baseret på største knap
+    height: 140, // Fast højde for alle knapper
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#fff',
+    padding: 15,
+    borderRadius: 12,
     borderWidth: 1,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 8,
-    elevation: 4,
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.08,
+    shadowRadius: 3,
+    elevation: 3,
   },
   iconContainer: {
-    width: 56,
-    height: 56,
-    borderRadius: 28,
-    justifyContent: "center",
-    alignItems: "center",
+    width: 64,
+    height: 64,
+    borderRadius: 32,
+    justifyContent: 'center',
+    alignItems: 'center',
     marginBottom: 12,
   },
-  cardTitle: {
+  featureTitle: {
     fontSize: 16,
-    fontWeight: "600",
-    color: "#1a1a1a",
-    textAlign: "center",
-  },
-  version: {
-    textAlign: "center",
-    color: "#999",
-    fontSize: 12,
-    marginBottom: 16,
-  },
+    fontWeight: '500',
+    color: '#333',
+    textAlign: 'center',
+    width: '100%',  // Sikrer at teksten holder sig inden for knappen
+  }
 });
