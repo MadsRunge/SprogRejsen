@@ -10,13 +10,13 @@ import {
 } from "firebase/firestore";
 
 const firebaseConfig = {
-  apiKey: "AIzaSyCO0lAbNmK34pm_GXRPq3c1AGYwF3n1o_Y",
-  authDomain: "scantranslate-ac6bd.firebaseapp.com",
-  projectId: "scantranslate-ac6bd",
-  storageBucket: "scantranslate-ac6bd.firebasestorage.app",
-  messagingSenderId: "183089225232",
-  appId: "1:183089225232:web:7da0191831ef0769e43495",
-  measurementId: "G-7KSWJ1EHB0",
+  apiKey: process.env.EXPO_PUBLIC_FIREBASE_API_KEY,
+  authDomain: process.env.EXPO_PUBLIC_FIREBASE_AUTH_DOMAIN,
+  projectId: process.env.EXPO_PUBLIC_FIREBASE_PROJECT_ID,
+  storageBucket: process.env.EXPO_PUBLIC_FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: process.env.EXPO_PUBLIC_FIREBASE_MESSAGING_SENDER_ID,
+  appId: process.env.EXPO_PUBLIC_FIREBASE_APP_ID,
+  measurementId: process.env.EXPO_PUBLIC_FIREBASE_MEASUREMENT_ID,
 };
 
 // Initialize Firebase
