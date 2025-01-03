@@ -14,10 +14,13 @@ export const transcribeAudio = async (audioBase64, config = {}) => {
 
     const requestBody = {
       config: {
-        encoding: config.encoding || "LINEAR16",
-        sampleRateHertz: config.sampleRateHertz || 16000,
-        languageCode: config.languageCode || "da-DK",
-        model: config.model || "default",
+        encoding: "LINEAR16",
+        sampleRateHertz: 48000,
+        languageCode: "da-DK",
+        model: "default",
+        audioChannelCount: 1,
+        enableAutomaticPunctuation: true,
+        useEnhanced: true,
         ...config,
       },
       audio: {
@@ -25,7 +28,10 @@ export const transcribeAudio = async (audioBase64, config = {}) => {
       },
     };
 
-    console.log("Making request to Speech-to-Text API...");
+    console.log(
+      "Making request to Speech-to-Text API with config:",
+      JSON.stringify(requestBody.config)
+    );
 
     const response = await fetch(
       `${SPEECH_API_ENDPOINT}?key=${GOOGLE_CLOUD_API_KEY}`,
@@ -50,7 +56,13 @@ export const transcribeAudio = async (audioBase64, config = {}) => {
     console.log("Speech-to-Text API Response:", JSON.stringify(data, null, 2));
 
     if (!data.results || data.results.length === 0) {
-      throw new Error("No transcription results found");
+      console.error(
+        "No transcription results in response:",
+        JSON.stringify(data)
+      );
+      throw new Error(
+        "Ingen tale blev genkendt. Prøv at tale tydeligere eller tjek din mikrofon."
+      );
     }
 
     // Return the transcribed text from all results
@@ -64,6 +76,6 @@ export const transcribeAudio = async (audioBase64, config = {}) => {
     };
   } catch (error) {
     console.error("Error in transcribeAudio:", error);
-    throw new Error("Kunne ikke transskribere lyden");
+    throw error;
   }
 };

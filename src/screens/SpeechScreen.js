@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import {
   View,
   Text,
@@ -21,17 +21,34 @@ export default function SpeechScreen() {
   const [isProcessing, setIsProcessing] = useState(false);
   const [isPlaying, setIsPlaying] = useState(false);
 
-  useEffect(() => {
-    return () => {
+  // Cleanup function for recording
+  const cleanupRecording = useCallback(async () => {
+    try {
       if (recording) {
-        recording.stopAndUnloadAsync();
+        console.log("Cleaning up recording...");
+        if (recording._isDoneRecording) {
+          console.log("Recording is already done, skipping cleanup");
+          return;
+        }
+        await recording.stopAndUnloadAsync();
+        await Audio.setAudioModeAsync({
+          allowsRecordingIOS: false,
+          playsInSilentModeIOS: true,
+        });
       }
-    };
+    } catch (error) {
+      console.error("Fejl ved cleanup af optagelse:", error);
+    } finally {
+      setRecording(null);
+    }
   }, [recording]);
+
 
   const startRecording = async () => {
     try {
-      // Anmod om tilladelser
+      await cleanupRecording();
+
+      console.log("Requesting permissions...");
       const permissionResponse = await Audio.requestPermissionsAsync();
       if (permissionResponse.status !== "granted") {
         Alert.alert(
@@ -41,62 +58,110 @@ export default function SpeechScreen() {
         return;
       }
 
-      // Konfigurer audio session
+      console.log("Setting audio mode...");
       await Audio.setAudioModeAsync({
         allowsRecordingIOS: true,
         playsInSilentModeIOS: true,
+        staysActiveInBackground: true,
+        shouldDuckAndroid: true,
       });
 
-      // Start optagelse
+      console.log("Creating new recording...");
       const newRecording = new Audio.Recording();
-      await newRecording.prepareToRecordAsync(
-        Audio.RecordingOptionsPresets.HIGH_QUALITY
-      );
-      await newRecording.startAsync();
 
+      // Configure recording options
+      const recordingOptions = {
+        isMeteringEnabled: true,
+        android: {
+          extension: ".wav",
+          outputFormat: Audio.AndroidOutputFormat.MPEG_4,
+          audioEncoder: Audio.AndroidAudioEncoder.AAC,
+          numberOfChannels: 1,
+          bitRate: 128000,
+          sampleRate: 48000,
+        },
+        ios: {
+          extension: ".wav",
+          outputFormat: Audio.IOSOutputFormat.LINEARPCM,
+          audioQuality: Audio.IOSAudioQuality.MAX,
+          sampleRate: 48000,
+          numberOfChannels: 1,
+          bitRate: 128000,
+          linearPCMBitDepth: 16,
+          linearPCMIsBigEndian: false,
+          linearPCMIsFloat: false,
+        },
+      };
+
+      console.log(
+        "Preparing to record with options:",
+        JSON.stringify(recordingOptions)
+      );
+      await newRecording.prepareToRecordAsync(recordingOptions);
+
+      console.log("Starting recording...");
+      await newRecording.startAsync();
       setRecording(newRecording);
       setIsRecording(true);
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     } catch (error) {
       console.error("Fejl ved start af optagelse:", error);
-      Alert.alert("Fejl", "Kunne ikke starte optagelse");
+      Alert.alert(
+        "Fejl ved optagelse",
+        "Kunne ikke starte optagelse. Prøv at genstarte appen."
+      );
+      await cleanupRecording();
     }
   };
 
   const stopRecording = async () => {
-    try {
-      if (!recording) return;
+    if (!recording || !isRecording) return;
 
-      await recording.stopAndUnloadAsync();
+    try {
+      console.log("Stopping recording...");
       setIsRecording(false);
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
 
+      await recording.stopAndUnloadAsync();
+      console.log("Recording stopped");
+
       const uri = recording.getURI();
+      console.log("Recording URI:", uri);
+
+      if (!uri) {
+        throw new Error("Ingen optagelse fundet");
+      }
+
       setIsProcessing(true);
 
-      // Konverter optagelsen til base64
+      console.log("Reading audio file...");
       const base64Audio = await FileSystem.readAsStringAsync(uri, {
         encoding: FileSystem.EncodingType.Base64,
       });
+      console.log("Audio file read, length:", base64Audio.length);
 
-      // Send til Speech-to-Text API
+      console.log("Transcribing audio...");
       const result = await transcribeAudio(base64Audio);
-      setTranscribedText(result.transcription);
+      console.log("Transcription result:", result);
 
-      // Ryd optagelsen
-      setRecording(null);
+      setTranscribedText(result.transcription);
     } catch (error) {
       console.error("Fejl ved stop af optagelse:", error);
-      Alert.alert("Fejl", "Kunne ikke behandle optagelsen");
+      Alert.alert(
+        "Fejl",
+        error.message ||
+          "Der opstod en fejl under behandling af optagelsen. Prøv igen."
+      );
     } finally {
       setIsProcessing(false);
+      await cleanupRecording();
     }
   };
 
   const playTranscribedText = async () => {
-    try {
-      if (!transcribedText) return;
+    if (!transcribedText || isPlaying) return;
 
+    try {
       setIsPlaying(true);
       const sound = await synthesizeSpeech(transcribedText);
 
