@@ -235,9 +235,7 @@ export default function TextTranslateScreen({ navigation }) {
   );
 }
 
-//
-// --- STYLES ---
-//
+
 const PRIMARY_COLOR = '#007AFF';
 const BG_COLOR = '#f5f5f5';
 const CARD_COLOR = '#fff';

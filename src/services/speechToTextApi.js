@@ -154,6 +154,7 @@ export class StreamingRecognition {
   async start() {
     // Implementation af WebSocket baseret streaming vil blive tilføjet her
     // Dette kræver yderligere setup på server-siden
+    // Når ikke at få lavet dette
   }
 
   // Stop streaming recognition

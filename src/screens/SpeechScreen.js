@@ -42,7 +42,7 @@ export default function SpeechScreen() {
   const [showLanguageModal, setShowLanguageModal] = useState(false);
   const [sourceLanguage, setSourceLanguage] = useState('da-DK');
   const [targetLanguage, setTargetLanguage] = useState('en-US');
-  const [selectedLanguageType, setSelectedLanguageType] = useState(null); // 'source' eller 'target'
+  const [selectedLanguageType, setSelectedLanguageType] = useState(null);
   const [recordingDuration, setRecordingDuration] = useState(0);
   const [recordingTimer, setRecordingTimer] = useState(null);
 

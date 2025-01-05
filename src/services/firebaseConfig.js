@@ -32,7 +32,7 @@ export const saveTranslation = async (translationData) => {
       translatedText: translationData.translatedText,
       sourceLanguage: translationData.sourceLanguage,
       targetLanguage: "da",
-      timestamp: serverTimestamp(), // Brug serverTimestamp i stedet for new Date()
+      timestamp: serverTimestamp(), 
     });
 
     console.log("Translation saved successfully with ID:", docRef.id);

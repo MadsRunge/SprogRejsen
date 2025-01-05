@@ -108,7 +108,6 @@ const requestBody = {
   },
 };
 
-// Tilføj SSML tags for ekstra volumen
 const textWithEmphasis = `<speak><prosody volume="x-loud">${text}</prosody></speak>`;
 requestBody.input = {
   ssml: textWithEmphasis

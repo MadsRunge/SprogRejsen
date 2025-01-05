@@ -20,7 +20,7 @@ export default function HomeScreen({ navigation }) {
         key={feature.id}
         style={[
           styles.featureButton,
-          { borderColor: feature.color + '40' } // Tilføjer 25% opacity version af farven
+          { borderColor: feature.color + '40' } 
         ]}
         onPress={() => navigation.navigate(feature.route)}
         activeOpacity={0.7}
@@ -38,28 +38,28 @@ export default function HomeScreen({ navigation }) {
       id: 'camera',
       title: 'Scan Tekst',
       icon: 'camera-alt',
-      color: '#3B82F6',  // Bright blue
+      color: '#3B82F6',  
       route: 'Camera'
     },
     {
       id: 'text',
       title: 'Oversæt Tekst',
       icon: 'translate',
-      color: '#10B981',  // Emerald green
+      color: '#10B981',  
       route: 'TextTranslate'
     },
     {
       id: 'speech',
       title: 'Tale Oversættelse',
       icon: 'record-voice-over',
-      color: '#F97316',  // Orange
+      color: '#F97316', 
       route: 'Speech'
     },
     {
       id: 'history',
       title: 'Historik',
       icon: 'history',
-      color: '#8B5CF6',  // Purple
+      color: '#8B5CF6', 
       route: 'History'
     }
   ];
@@ -241,8 +241,8 @@ const styles = StyleSheet.create({
     paddingTop: 40,
   },
   featureButton: {
-    width: 160,  // Fast bredde baseret på største knap
-    height: 140, // Fast højde for alle knapper
+    width: 160, 
+    height: 140, 
     alignItems: 'center',
     justifyContent: 'center',
     backgroundColor: '#fff',
@@ -271,6 +271,6 @@ const styles = StyleSheet.create({
     fontWeight: '500',
     color: '#333',
     textAlign: 'center',
-    width: '100%',  // Sikrer at teksten holder sig inden for knappen
+    width: '100%', 
   }
 });
