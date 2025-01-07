@@ -25,6 +25,7 @@ const db = getFirestore(app);
 
 export const saveTranslation = async (translationData) => {
   try {
+    // Opret reference til 'translations' collection i Firestore
     const translationsRef = collection(db, "translations");
 
     const docRef = await addDoc(translationsRef, {

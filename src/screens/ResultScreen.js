@@ -27,12 +27,12 @@ export default function ResultScreen({ route, navigation }) {
     const performTranslation = async () => {
       try {
         if (recognizedText) {
-          // Oversæt teksten
+          // 1. Oversæt teksten
           const result = await translateText(recognizedText);
           setTranslatedText(result.translatedText);
           setSourceLanguage(result.sourceLanguage);
 
-          // Gem oversættelsen i Firebase
+          // 2. Gem oversættelsen i Firebase
           setIsSaving(true);
           await saveTranslation({
             originalText: recognizedText,

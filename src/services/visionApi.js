@@ -9,12 +9,12 @@ export const recognizeText = async (imageUri) => {
       throw new Error("Google Cloud API Key is not configured");
     }
 
-    // Convert image to base64
+    // Konverter billede til base64, da google vision API kræver dette
     const base64Image = await FileSystem.readAsStringAsync(imageUri, {
       encoding: FileSystem.EncodingType.Base64,
     });
 
-    // Prepare the request body
+    // Forbered API request til Google Cloud Vision
     const body = {
       requests: [
         {
@@ -33,7 +33,7 @@ export const recognizeText = async (imageUri) => {
 
     console.log("Making request to Vision API...");
 
-    // Make the API request
+    // Lav API request til google vision API
     const response = await fetch(
       `${VISION_API_ENDPOINT}?key=${GOOGLE_CLOUD_API_KEY}`,
       {
@@ -57,13 +57,13 @@ export const recognizeText = async (imageUri) => {
     const data = await response.json();
     console.log("Vision API Response:", JSON.stringify(data, null, 2));
 
-    // Extract the text from the response
+    // Her udtrækkes teksten fra responset
     const textAnnotations = data.responses[0]?.textAnnotations;
     if (!textAnnotations || textAnnotations.length === 0) {
       return "";
     }
 
-    // Return the full text (first element contains the entire text)
+    //Returnere den fulde tekst (Første element indeholder hele teksten)
     return textAnnotations[0].description;
   } catch (error) {
     console.error("Error in recognizeText:", error);

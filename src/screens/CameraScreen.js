@@ -99,6 +99,7 @@ export default function CameraScreen({ navigation }) {
     try {
       setIsProcessing(true);
 
+      // Tag billedet med kameraet
       const photo = await cameraRef.current.takePictureAsync({
         quality: 1,
         base64: true,
@@ -110,6 +111,7 @@ export default function CameraScreen({ navigation }) {
 
       let textToRecognize;
       
+      // Hvis rammen er aktiveret, beskær billedet først
       if (frameEnabled) {
         const frameMetrics = {
           x: framePosition.x,
@@ -123,11 +125,14 @@ export default function CameraScreen({ navigation }) {
         const croppedUri = await cropImage(photo.uri, frameMetrics);
         textToRecognize = await recognizeText(croppedUri);
         
+        // Ryd op efter beskæring
         await FileSystem.deleteAsync(croppedUri).catch(console.error);
       } else {
+        // Ellers brug hele billedet
         textToRecognize = await recognizeText(photo.uri);
       }
 
+      // Tjek om vi fandt noget tekst
       if (!textToRecognize || textToRecognize.length === 0) {
         Alert.alert(
           "Ingen tekst fundet",
@@ -136,6 +141,7 @@ export default function CameraScreen({ navigation }) {
         return;
       }
 
+      // Naviger til ResultScreen med den genkendte tekst
       navigation.navigate("Result", {
         recognizedText: textToRecognize,
       });

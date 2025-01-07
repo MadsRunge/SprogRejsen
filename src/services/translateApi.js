@@ -1,9 +1,10 @@
 // translateApi.js
 import { GOOGLE_CLOUD_API_KEY } from "@env";
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import * as Crypto from 'expo-crypto';
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import * as Crypto from "expo-crypto";
 
-const TRANSLATE_API_ENDPOINT = "https://translation.googleapis.com/language/translate/v2";
+const TRANSLATE_API_ENDPOINT =
+  "https://translation.googleapis.com/language/translate/v2";
 const CACHE_DURATION = 30 * 24 * 60 * 60 * 1000; // 30 dage
 const MAX_BATCH_SIZE = 128; // Maximum antal tekster i én batch
 
@@ -19,9 +20,11 @@ async function generateCacheKey(text, sourceLang, targetLang) {
 // Check om cached oversættelse er gyldig
 async function isValidCache(cacheKey) {
   try {
-    const metadata = await AsyncStorage.getItem(`translate_metadata_${cacheKey}`);
+    const metadata = await AsyncStorage.getItem(
+      `translate_metadata_${cacheKey}`
+    );
     if (!metadata) return false;
-    
+
     const { timestamp } = JSON.parse(metadata);
     return Date.now() - timestamp < CACHE_DURATION;
   } catch {
@@ -62,7 +65,11 @@ async function processBatch(texts, targetLang, sourceLang = null) {
 }
 
 // Hovedfunktion for oversættelse
-export const translateText = async (text, targetLang = "da", sourceLang = null) => {
+export const translateText = async (
+  text,
+  targetLang = "da",
+  sourceLang = null
+) => {
   try {
     // Validér input
     if (!text?.trim()) return "";
@@ -70,15 +77,17 @@ export const translateText = async (text, targetLang = "da", sourceLang = null) 
       throw new Error("Google Cloud API nøgle mangler");
     }
 
-    // Check cache først
+    // Smart caching system checker først for eksisterende oversættelser
     const cacheKey = await generateCacheKey(text, sourceLang, targetLang);
-    const cachedTranslation = await AsyncStorage.getItem(`translate_${cacheKey}`);
-    
-    if (await isValidCache(cacheKey) && cachedTranslation) {
+    const cachedTranslation = await AsyncStorage.getItem(
+      `translate_${cacheKey}`
+    );
+
+    if ((await isValidCache(cacheKey)) && cachedTranslation) {
       return JSON.parse(cachedTranslation);
     }
 
-    // Udfør oversættelse
+    // Hvis ingen cache, lav oversættelse via API
     const translations = await processBatch([text], targetLang, sourceLang);
     if (!translations?.[0]?.translatedText) {
       throw new Error("Uventet response format fra Translate API");
@@ -86,11 +95,12 @@ export const translateText = async (text, targetLang = "da", sourceLang = null) 
 
     const result = {
       translatedText: translations[0].translatedText,
-      sourceLanguage: translations[0].detectedSourceLanguage || sourceLang || "unknown",
-      targetLanguage: targetLang
+      sourceLanguage:
+        translations[0].detectedSourceLanguage || sourceLang || "unknown",
+      targetLanguage: targetLang,
     };
 
-    // Gem i cache
+    // Gem i cache til fremtidig brug
     await AsyncStorage.setItem(`translate_${cacheKey}`, JSON.stringify(result));
     await AsyncStorage.setItem(
       `translate_metadata_${cacheKey}`,
@@ -105,16 +115,18 @@ export const translateText = async (text, targetLang = "da", sourceLang = null) 
 };
 
 // Batch oversættelse af multiple tekster
-export const translateBatch = async (texts, targetLang = "da", sourceLang = null) => {
+export const translateBatch = async (
+  texts,
+  targetLang = "da",
+  sourceLang = null
+) => {
   try {
     if (!Array.isArray(texts) || texts.length === 0) {
       throw new Error("Ingen tekster at oversætte");
     }
 
     // Fjern tomme tekster og trim
-    const validTexts = texts
-      .map(t => t?.trim())
-      .filter(Boolean);
+    const validTexts = texts.map((t) => t?.trim()).filter(Boolean);
 
     if (validTexts.length === 0) {
       return [];
@@ -131,8 +143,9 @@ export const translateBatch = async (texts, targetLang = "da", sourceLang = null
     return results.map((translation, index) => ({
       originalText: validTexts[index],
       translatedText: translation.translatedText,
-      sourceLanguage: translation.detectedSourceLanguage || sourceLang || "unknown",
-      targetLanguage: targetLang
+      sourceLanguage:
+        translation.detectedSourceLanguage || sourceLang || "unknown",
+      targetLanguage: targetLang,
     }));
   } catch (error) {
     console.error("Batch translation error:", error);
@@ -144,11 +157,11 @@ export const translateBatch = async (texts, targetLang = "da", sourceLang = null
 export const cleanupTranslationCache = async () => {
   try {
     const keys = await AsyncStorage.getAllKeys();
-    const translationKeys = keys.filter(k => k.startsWith('translate_'));
-    
+    const translationKeys = keys.filter((k) => k.startsWith("translate_"));
+
     for (const key of translationKeys) {
-      if (key.includes('metadata_')) {
-        const cacheKey = key.replace('translate_metadata_', '');
+      if (key.includes("metadata_")) {
+        const cacheKey = key.replace("translate_metadata_", "");
         if (!(await isValidCache(cacheKey))) {
           await AsyncStorage.removeItem(key);
           await AsyncStorage.removeItem(`translate_${cacheKey}`);
@@ -156,7 +169,7 @@ export const cleanupTranslationCache = async () => {
       }
     }
   } catch (error) {
-    console.error('Cache cleanup error:', error);
+    console.error("Cache cleanup error:", error);
   }
 };
 
